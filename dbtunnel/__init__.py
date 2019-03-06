@@ -138,11 +138,11 @@ def stop_tunnel(database):
 		pass
 	db = settings.DATABASES[database]
 	# Stop the server
-	if db.has_key(SSH_TUNNEL_KEY):
+	if SSH_TUNNEL_KEY in db:
 		db[SSH_TUNNEL_KEY].shutdown()
 		del db[SSH_TUNNEL_KEY]
 	# Stop the client
-	if db.has_key(SSH_CLIENT_KEY):
+	if SSH_CLIENT_KEY in db:
 		db[SSH_CLIENT_KEY].close()
 		del db[SSH_CLIENT_KEY]
 
