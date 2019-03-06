@@ -1,8 +1,8 @@
 import os
 import select
 import socket
-import SocketServer
-import thread
+import socketserver
+import _thread
 
 from django.conf import settings
 from django.db import connections
@@ -19,15 +19,15 @@ in addition to specifying the host, username, and identityfile
 SSH_CLIENT_KEY = '__DATABASE_SSH_CLIENT'
 SSH_TUNNEL_KEY = '__DATABASE_SSH_TUNNEL'
 
-class __PortForwardingServer(SocketServer.ThreadingTCPServer):
+class __PortForwardingServer(socketserver.ThreadingTCPServer):
 	daemon_threads = True
 	allow_reuse_address = True
 
-class __PortForwardingServerHandler(SocketServer.BaseRequestHandler):
+class __PortForwardingServerHandler(socketserver.BaseRequestHandler):
 	def handle(self):
 		try:
 			chan = self.ssh_transport.open_channel('direct-tcpip', (self.chain_host, self.chain_port), self.request.getpeername())
-		except Exception, e:
+		except Exception as e:
 			#print 'Incoming request to %s:%d failed: %s' % (self.chain_host, self.chain_port, repr(e))
 			return
 		if chan is None:
@@ -126,7 +126,7 @@ def start_tunnel(database, use_ssh_config=False):
 	db[SSH_TUNNEL_KEY] = server
 	db[SSH_CLIENT_KEY] = client
 	# Start port forwarding server on another thread
-	thread.start_new_thread(__start_tunnel, (server,))
+	_thread.start_new_thread(__start_tunnel, (server,))
 
 def stop_tunnel(database):
 	if not database:
