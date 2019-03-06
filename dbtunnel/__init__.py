@@ -58,24 +58,24 @@ def start_tunnel(database, use_ssh_config=False):
 		return
 	from paramiko import AutoAddPolicy, SSHClient, SSHConfig
 	db = settings.DATABASES[database]
-	if db.has_key(SSH_CLIENT_KEY):
+	if SSH_CLIENT_KEY in db:
 		# Tunnel is already running
 		return
-	if not db.has_key('REMOTE_HOST'):
+	if not 'REMOTE_HOST' in db:
 		raise ValueError('REMOTE_HOST not specified for ' + database)
-	if not db.has_key('TUNNEL_HOST'):
+	if not 'TUNNEL_HOST' in db:
 		raise ValueError('TUNNEL_HOST not specified for ' + database)
 	kwargs = {}
 	hostname = db['TUNNEL_HOST']
 	
 	# Setup the kwargs
-	if db.has_key('TUNNEL_USER'):
+	if 'TUNNEL_USER' in db:
 		kwargs['username'] = db['TUNNEL_USER']
-	if db.has_key('TUNNEL_PASSWORD'):
+	if 'TUNNEL_PASSWORD' in db:
 		kwargs['password'] = db['TUNNEL_PASSWORD']
-	if db.has_key('TUNNEL_IDENTITY'):
+	if 'TUNNEL_IDENTITY' in db:
 		kwargs['key_filename'] = db['TUNNEL_IDENTITY']
-	if db.has_key('TUNNEL_PORT'):
+	if 'TUNNEL_PORT' in db:
 		kwargs['port'] = int(db['TUNNEL_PORT'])
 	if use_ssh_config:
 		try:
@@ -85,13 +85,13 @@ def start_tunnel(database, use_ssh_config=False):
 				config = sshConfig.lookup(db['TUNNEL_HOST'])
 				hostname = config['hostname']
 				# Use username and port if missing
-				if not kwargs.has_key('username') and config.has_key('user'):
+				if not 'username' in kwargs and 'user' in config:
 					kwargs['username'] = config['user']
-				if not kwargs.has_key('port') and config.has_key('port'):
+				if not 'port' in kwargs and 'port' in config:
 					kwargs['port'] = int(config['port'])
 				# Add identityfile (a list)
-				if config.has_key('identityfile'):
-					if kwargs.has_key('key_filename'):
+				if 'identityfile' in config:
+					if 'key_filename' in kwargs:
 						if type(kwargs['key_filename']) is list:
 							kwargs['key_filename'] += config['identityfile']
 						else:
@@ -102,7 +102,7 @@ def start_tunnel(database, use_ssh_config=False):
 			pass
 
 	# Fix the identity files
-	if kwargs.has_key('key_filename'):
+	if 'key_filename' in kwargs:
 		if type(kwargs['key_filename']) is list:
 			for i in range(len(kwargs['key_filename'])):
 				if kwargs['key_filename'][i].startswith('~'):
